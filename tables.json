@@ -43,21 +43,16 @@
     "GlobalSecondaryIndexes": [
       {
         "IndexName": "status_gsi",
-        "KeySchema": [{ "AttributeName": "statusGSI", "KeyType": "HASH" }],
+        "KeySchema": [
+          { "AttributeName": "statusGSI", "KeyType": "HASH" },
+          { "AttributeName": "created_at", "KeyType": "RANGE" }
+        ],
         "Projection": { "ProjectionType": "ALL" }
       },
       {
         "IndexName": "order_gsi",
         "KeySchema": [
           { "AttributeName": "order_id", "KeyType": "HASH" },
-          { "AttributeName": "created_at", "KeyType": "RANGE" }
-        ],
-        "Projection": { "ProjectionType": "ALL" }
-      },
-      {
-        "IndexName": "status_gsi",
-        "KeySchema": [
-          { "AttributeName": "statusGSI", "KeyType": "HASH" },
           { "AttributeName": "created_at", "KeyType": "RANGE" }
         ],
         "Projection": { "ProjectionType": "ALL" }

@@ -373,38 +373,42 @@ class payment_gateway_service {
    */
   static async get_failed_transactions(start_date, end_date) {
     const expressionValues = {
-      ":gsi": "status#failed",
+      ":status": "status#failed",
     };
 
     const expressionNames = {
-      "#gsi_status_pk": "statusGSI",
+      "#statusGSI": "statusGSI",
     };
 
-    const keyCondition = "#gsi_status_pk = :gsi";
+    let keyCondition = "#statusGSI = :status";
+
+    if (start_date && end_date) {
+      const start = new Date(start_date);
+      const end = new Date(end_date);
+
+      if (isNaN(start) || isNaN(end) || start > end) {
+        console.warn("⚠️ Invalid date range. Returning []");
+        return [];
+      }
+
+      expressionValues[":start"] = start.toISOString();
+      expressionValues[":end"] = end.toISOString();
+      expressionNames["#created_at"] = "created_at";
+
+      keyCondition += " AND #created_at BETWEEN :start AND :end";
+    }
 
     const queryOptions = {
       IndexName: "status_gsi",
       ExpressionAttributeNames: expressionNames,
     };
 
-    // Optional filtering
-    if (start_date && end_date) {
-      const start = new Date(start_date);
-      const end = new Date(end_date);
-
-      if (isNaN(start) || isNaN(end) || start > end) {
-        console.warn("⚠️ Invalid date range. Returning empty.");
-        return [];
-      }
-
-      expressionValues[":start"] = start.toISOString();
-      expressionValues[":end"] = end.toISOString();
-
-      expressionNames["#created_at"] = "created_at";
-      queryOptions.FilterExpression = "#created_at BETWEEN :start AND :end";
-    }
-
-    queryOptions.ExpressionAttributeNames = expressionNames;
+    // 🔍 Debug
+    console.log("🔍 get_failed_transactions DEBUG");
+    console.log("KeyCondition:", keyCondition);
+    console.log("Values:", expressionValues);
+    console.log("Names:", expressionNames);
+    console.log("Options:", queryOptions);
 
     return scylla_db.query(
       table_names.transactions,
@@ -419,9 +423,18 @@ class payment_gateway_service {
    * @param {string} order_id - required
    */
   static async get_order_webhooks(order_id) {
-    return scylla_db.query(table_names.webhooks, "#pk = :pk", {
-      ":pk": `order#${order_id}`,
-    });
+    return scylla_db.query(
+      table_names.webhooks,
+      "#pk = :pk",
+      {
+        ":pk": `order#${order_id}`,
+      },
+      {
+        ExpressionAttributeNames: {
+          "#pk": "pk",
+        },
+      }
+    );
   }
 
   /**
@@ -429,12 +442,42 @@ class payment_gateway_service {
    * @param {string} subscription_id - required
    */
   static async get_subscription_webhooks(subscription_id) {
-    return scylla_db.query(
-      table_names.webhooks,
-      `${gsi_attribute_names.subscription_pk} = :gsi`,
-      { ":gsi": `sub#${subscription_id}` },
-      { indexName: gsi_index_names.subscription_gsi }
-    );
+    const expressionValues = {
+      ":subId": subscription_id,
+    };
+
+    const expressionNames = {
+      "#subscriptionId": "subscriptionId",
+    };
+
+    const keyCondition = "#subscriptionId = :subId";
+
+    const queryOptions = {
+      IndexName: "subscription_gsi",
+      ExpressionAttributeNames: expressionNames,
+    };
+
+    // 🔍 Full Debug Output
+    // console.log("\n🔎 get_subscription_webhooks DEBUG:");
+    // console.log("Table:", table_names.webhooks);
+    // console.log("KeyConditionExpression:", keyCondition);
+    // console.log("ExpressionAttributeValues:", expressionValues);
+    // console.log("ExpressionAttributeNames:", expressionNames);
+    // console.log("QueryOptions:", queryOptions);
+
+    try {
+      const result = await scylla_db.query(
+        table_names.webhooks,
+        keyCondition,
+        expressionValues,
+        queryOptions
+      );
+      console.log("✅ Query result:", result);
+      return result;
+    } catch (error) {
+      console.error("❌ Query failed:", error.message || error);
+      throw error;
+    }
   }
 
   /**
