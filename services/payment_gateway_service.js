@@ -485,16 +485,47 @@ class payment_gateway_service {
    * @param {string} order_id - required
    */
   static async get_order_full_data(order_id) {
+    const expressionNames = {
+      "#order_id": "order_id", // Must match your GSI key name
+      "#created_at": "created_at",
+    };
+
+    const expressionValues = {
+      ":order_id": `order#${order_id}`, // Ensure this matches your seeded data
+      ":start": "2000-01-01T00:00:00.000Z", // Safe default for full range
+      ":end": new Date().toISOString(),
+    };
+
+    const keyCondition =
+      "#order_id = :order_id AND #created_at BETWEEN :start AND :end";
+
+    const options = {
+      IndexName: "order_gsi",
+      ExpressionAttributeNames: expressionNames,
+    };
+
+    console.log("🔍 get_order_full_data DEBUG (Schedules)");
+    console.log("KeyConditionExpression:", keyCondition);
+    console.log("ExpressionAttributeValues:", expressionValues);
+    console.log("ExpressionAttributeNames:", expressionNames);
+    console.log("IndexName:", options.indexName);
+
     const [txns, sessions, schedules] = await Promise.all([
       this.get_order_transactions(order_id, null, null),
       this.get_order_sessions(order_id, null, null),
       scylla_db.query(
         table_names.schedules,
-        `${gsi_attribute_names.order_pk} = :gsi`,
-        { ":gsi": `order#${order_id}` },
-        { indexName: gsi_index_names.order_gsi }
+        keyCondition,
+        expressionValues,
+        options
       ),
     ]);
+
+    // console.log("📦 Result Summary:");
+    // console.log("→ Transactions:", txns.length);
+    // console.log("→ Sessions:", sessions.length);
+    // console.log("→ Schedules:", schedules.length);
+
     return { txns, sessions, schedules };
   }
 

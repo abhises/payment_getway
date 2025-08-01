@@ -28,12 +28,14 @@ async function seedSchedules() {
     const scheduledFor = formatISODate(date);
     const scheduleId = randomUUID();
     const subscriptionId = `sub#${Math.floor(Math.random() * 10000)}`;
+    const orderId = `order#${1000 + i}`; // 👈 Add order_id here
 
     const item = {
       pk: `user#${userId}`,
       sk: `schedule#${scheduleId}`,
       schedule_id: scheduleId,
       subscriptionId,
+      order_id: orderId, // ✅ Add to item
       scheduled_for: scheduledFor,
       created_at: createdAt,
       retry_count: 0,
@@ -41,7 +43,9 @@ async function seedSchedules() {
     };
 
     await ScyllaDb.putItem(tableName, item);
-    console.log(`✅ Inserted schedule for ${scheduledFor}`);
+    console.log(
+      `✅ Inserted schedule for ${scheduledFor} with order_id: ${orderId}`
+    );
   }
 
   console.log("🎉 Done seeding schedules");
@@ -49,7 +53,7 @@ async function seedSchedules() {
   // ✅ Add delay
   console.log("⏳ Waiting 3 seconds after test completion...");
   await wait(3000);
-  console.log("✅ Transaction test has been completed.");
+  console.log("✅ Schedule seed test has been completed.");
 }
 
 seedSchedules()
