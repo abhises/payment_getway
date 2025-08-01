@@ -225,10 +225,47 @@ class payment_gateway_service {
    * @param {string} end_date - optional
    */
   static async get_user_sessions(user_id, start_date, end_date) {
+    const expressionValues = {
+      ":pk": `user#${user_id}`,
+    };
+
+    const expressionNames = {
+      "#pk": "pk",
+    };
+
+    const queryOptions = {
+      ExpressionAttributeNames: expressionNames,
+    };
+
+    // Add optional date filter
+    if (start_date && end_date) {
+      const start = new Date(start_date);
+      const end = new Date(end_date);
+
+      if (isNaN(start) || isNaN(end) || start > end) {
+        console.warn("⚠️ Invalid date range. Returning []");
+        return [];
+      }
+
+      expressionValues[":start"] = start.toISOString();
+      expressionValues[":end"] = end.toISOString();
+
+      expressionNames["#created_at"] = "created_at";
+      queryOptions.FilterExpression = "#created_at BETWEEN :start AND :end";
+    }
+
+    // Debug
+    // console.log("🔍 get_user_sessions DEBUG");
+    // console.log("KeyCondition: #pk = :pk");
+    // console.log("ExpressionAttributeValues:", expressionValues);
+    // console.log("ExpressionAttributeNames:", expressionNames);
+    // console.log("QueryOptions:", queryOptions);
+
     return scylla_db.query(
       table_names.sessions,
-      "#pk = :pk AND created_at BETWEEN :start AND :end",
-      { ":pk": `user#${user_id}`, ":start": start_date, ":end": end_date }
+      "#pk = :pk",
+      expressionValues,
+      queryOptions
     );
   }
 
@@ -239,11 +276,50 @@ class payment_gateway_service {
    * @param {string} end_date - optional
    */
   static async get_order_sessions(order_id, start_date, end_date) {
+    const expressionValues = {
+      ":gsi": order_id,
+    };
+
+    const expressionNames = {
+      "#gsi_order_pk": "order_id", // GSI partition key
+    };
+
+    let keyCondition = "#gsi_order_pk = :gsi";
+
+    // Optional date filtering
+    if (start_date && end_date) {
+      const start = new Date(start_date);
+      const end = new Date(end_date);
+
+      if (isNaN(start) || isNaN(end) || start > end) {
+        console.warn("⚠️ Invalid date range provided. Returning empty result.");
+        return [];
+      }
+
+      expressionValues[":start"] = start.toISOString();
+      expressionValues[":end"] = end.toISOString();
+
+      expressionNames["#created_at"] = "created_at";
+      keyCondition += " AND #created_at BETWEEN :start AND :end";
+    }
+
+    const queryOptions = {
+      IndexName: "order_gsi",
+      ExpressionAttributeNames: expressionNames,
+    };
+
+    // Debug log
+    // console.log("🔍 get_order_sessions DEBUG");
+    // console.log("KeyCondition:", keyCondition);
+    // console.log("ExpressionAttributeValues:", expressionValues);
+    // console.log("ExpressionAttributeNames:", expressionNames);
+    // console.log("QueryOptions:", queryOptions);
+
     return scylla_db.query(
       table_names.sessions,
-      `${gsi_attribute_names.order_pk} = :gsi AND created_at BETWEEN :start AND :end`,
-      { ":gsi": `order#${order_id}`, ":start": start_date, ":end": end_date },
-      { indexName: gsi_index_names.order_gsi }
+      keyCondition,
+      expressionValues,
+      queryOptions
     );
   }
 
@@ -252,9 +328,14 @@ class payment_gateway_service {
    * @param {string} user_id - required
    */
   static async get_user_tokens(user_id) {
-    return scylla_db.query(table_names.tokens, "#pk = :pk", {
-      ":pk": `user#${user_id}`,
-    });
+    return scylla_db.query(
+      table_names.tokens,
+      "#pk = :pk", // Using placeholder
+      { ":pk": `user#${user_id}` }, // ExpressionAttributeValues
+      {
+        ExpressionAttributeNames: { "#pk": "pk" }, // REQUIRED!
+      }
+    );
   }
 
   /**
@@ -262,11 +343,26 @@ class payment_gateway_service {
    * @param {string} yyyy_mm - required (e.g. '2025-07')
    */
   static async get_tokens_soon_to_expire(yyyy_mm) {
+    const expressionValues = {
+      ":gsi": yyyy_mm,
+    };
+
+    const expressionNames = {
+      "#expiry": "expiry",
+    };
+
+    const keyCondition = "#expiry = :gsi";
+
+    const queryOptions = {
+      IndexName: "expiry_gsi",
+      ExpressionAttributeNames: expressionNames,
+    };
+
     return scylla_db.query(
       table_names.tokens,
-      `${gsi_attribute_names.expiry_pk} = :gsi`,
-      { ":gsi": `expiry#${yyyy_mm}` },
-      { indexName: gsi_index_names.expiry_gsi }
+      keyCondition,
+      expressionValues,
+      queryOptions
     );
   }
 
@@ -276,11 +372,45 @@ class payment_gateway_service {
    * @param {string} end_date - optional
    */
   static async get_failed_transactions(start_date, end_date) {
+    const expressionValues = {
+      ":gsi": "status#failed",
+    };
+
+    const expressionNames = {
+      "#gsi_status_pk": "statusGSI",
+    };
+
+    const keyCondition = "#gsi_status_pk = :gsi";
+
+    const queryOptions = {
+      IndexName: "status_gsi",
+      ExpressionAttributeNames: expressionNames,
+    };
+
+    // Optional filtering
+    if (start_date && end_date) {
+      const start = new Date(start_date);
+      const end = new Date(end_date);
+
+      if (isNaN(start) || isNaN(end) || start > end) {
+        console.warn("⚠️ Invalid date range. Returning empty.");
+        return [];
+      }
+
+      expressionValues[":start"] = start.toISOString();
+      expressionValues[":end"] = end.toISOString();
+
+      expressionNames["#created_at"] = "created_at";
+      queryOptions.FilterExpression = "#created_at BETWEEN :start AND :end";
+    }
+
+    queryOptions.ExpressionAttributeNames = expressionNames;
+
     return scylla_db.query(
       table_names.transactions,
-      `${gsi_attribute_names.status_pk} = :gsi AND created_at BETWEEN :start AND :end`,
-      { ":gsi": "status#failed", ":start": start_date, ":end": end_date },
-      { indexName: gsi_index_names.status_gsi }
+      keyCondition,
+      expressionValues,
+      queryOptions
     );
   }
 

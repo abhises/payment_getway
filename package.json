@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "createTable": "node createTable.js",
-    "test": "node  test/get_user_transactions_test.js && node test/get_user_schedules_test.js && node test/get_subscription_schedules_test.js && node test/get_order_transactions_test.js",
-    "seed": "node factory/seedTransactionTable.js & node factory/seedScheduleTable.js",
-    "seed:reset": "node factory/reset/deleteTransaction.js && node factory/reset/deleteSchedule.js",
+    "test": "node  test/get_user_transactions_test.js && node test/get_user_schedules_test.js && node test/get_subscription_schedules_test.js && node test/get_order_transactions_test.js && node test/get_user_sessions_test.js && node test/get_order_sessions_test.js && node test/get_user_tokens_test.js && node test/get_tokens_soon_to_expire_test.js && node test/get_failed_transactions_test.js",
+    "seed": "node factory/seedTransactionTable.js & node factory/seedScheduleTable.js && node factory/seedUserSession.js && node factory/seedToken.js",
+    "seed:reset": "node factory/reset/deleteTransaction.js && node factory/reset/deleteSchedule.js ",
     "deleteTable": "node deleteTable.js"
   },
   "author": "",

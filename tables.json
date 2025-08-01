@@ -1,13 +1,27 @@
 {
   "paymentGateway_sessions": {
     "TableName": "paymentGateway_sessions",
+    "PK": "pk",
+    "SK": "sk",
     "KeySchema": [
       { "AttributeName": "pk", "KeyType": "HASH" },
       { "AttributeName": "sk", "KeyType": "RANGE" }
     ],
     "AttributeDefinitions": [
       { "AttributeName": "pk", "AttributeType": "S" },
-      { "AttributeName": "sk", "AttributeType": "S" }
+      { "AttributeName": "sk", "AttributeType": "S" },
+      { "AttributeName": "order_id", "AttributeType": "S" },
+      { "AttributeName": "created_at", "AttributeType": "S" }
+    ],
+    "GlobalSecondaryIndexes": [
+      {
+        "IndexName": "order_gsi",
+        "KeySchema": [
+          { "AttributeName": "order_id", "KeyType": "HASH" },
+          { "AttributeName": "created_at", "KeyType": "RANGE" }
+        ],
+        "Projection": { "ProjectionType": "ALL" }
+      }
     ],
     "BillingMode": "PAY_PER_REQUEST"
   },
@@ -36,6 +50,14 @@
         "IndexName": "order_gsi",
         "KeySchema": [
           { "AttributeName": "order_id", "KeyType": "HASH" },
+          { "AttributeName": "created_at", "KeyType": "RANGE" }
+        ],
+        "Projection": { "ProjectionType": "ALL" }
+      },
+      {
+        "IndexName": "status_gsi",
+        "KeySchema": [
+          { "AttributeName": "statusGSI", "KeyType": "HASH" },
           { "AttributeName": "created_at", "KeyType": "RANGE" }
         ],
         "Projection": { "ProjectionType": "ALL" }
