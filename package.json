@@ -1,0 +1,19 @@
+{
+  "name": "y",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "createTable": "node createTable.js",
+    "test": "node  test/get_user_transactions_test.js && node test/get_user_schedules_test.js && node test/get_subscription_schedules_test.js && node test/get_order_transactions_test.js",
+    "seed": "node factory/seedTransactionTable.js & node factory/seedScheduleTable.js",
+    "seed:reset": "node factory/reset/deleteTransaction.js && node factory/reset/deleteSchedule.js",
+    "deleteTable": "node deleteTable.js"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "dotenv": "^17.2.1"
+  }
+}
