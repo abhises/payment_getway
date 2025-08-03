@@ -553,7 +553,7 @@ class payment_gateway_service {
    * @param {object} updates - required, fields to update
    */
   static async updateSession(pk, sk, updates) {
-    return scylla_db.updateItem(table_names.sessions, pk, sk, updates);
+    return scylla_db.updateItem(table_names.sessions, { pk, sk }, updates);
   }
 
   /**
@@ -562,7 +562,7 @@ class payment_gateway_service {
    * @param {string} sk - required, sort key
    */
   static async deleteSession(pk, sk) {
-    return scylla_db.deleteItem(table_names.sessions, pk, sk);
+    return scylla_db.deleteItem(table_names.sessions, { pk, sk });
   }
 
   /**
