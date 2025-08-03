@@ -530,6 +530,7 @@ export default class ScyllaDb {
    * Update item
    */
   static async updateItem(table, key, data) {
+    // console.log("key in scylla", key, data, table);
     if (
       !table ||
       !key ||
@@ -569,7 +570,7 @@ export default class ScyllaDb {
       ExpressionAttributeValues: ScyllaDb.marshalItem(exprValues),
       ReturnValues: "ALL_NEW",
     };
-
+    // console.log("payload", payload);
     const resp = await ScyllaDb.request(
       "UpdateItem",
       payload,

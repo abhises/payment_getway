@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "createTable": "node createTable.js",
-    "test": "node  test/get_user_transactions_test.js && node test/get_user_schedules_test.js && node test/get_subscription_schedules_test.js && node test/get_order_transactions_test.js && node test/get_user_sessions_test.js && node test/get_order_sessions_test.js && node test/get_user_tokens_test.js && node test/get_tokens_soon_to_expire_test.js && node test/get_failed_transactions_test.js && node test/get_order_webhooks_test.js && node test/get_subscription_webhooks_test.js && node test/get_order_full_data_test.js",
+    "test": "node  test/get_user_transactions_test.js && node test/get_user_schedules_test.js && node test/get_subscription_schedules_test.js && node test/get_order_transactions_test.js && node test/get_user_sessions_test.js && node test/get_order_sessions_test.js && node test/get_user_tokens_test.js && node test/get_tokens_soon_to_expire_test.js && node test/get_failed_transactions_test.js && node test/get_order_webhooks_test.js && node test/get_subscription_webhooks_test.js && node test/get_order_full_data_test.js && node test/transaction_crud_test.js && node test/schedule_crud_test.js && node test/web_hook_crud_test.js && node test/token_crud_test.js",
     "seed": "node factory/seedTransactionTable.js & node factory/seedScheduleTable.js && node factory/seedUserSession.js && node factory/seedToken.js && node factory/seedWebhook.js",
     "seed:reset": "node factory/reset/deleteTransaction.js && node factory/reset/deleteSchedule.js ",
     "deleteTable": "node deleteTable.js"
@@ -14,6 +14,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "dotenv": "^17.2.1"
+    "dotenv": "^17.2.1",
+    "uuid": "^11.1.0"
   }
 }

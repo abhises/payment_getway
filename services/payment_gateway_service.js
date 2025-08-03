@@ -591,7 +591,8 @@ class payment_gateway_service {
    * @param {object} updates - required
    */
   static async updateTransaction(pk, sk, updates) {
-    return scylla_db.updateItem(table_names.transactions, pk, sk, updates);
+    // console.log("item inside ", pk, sk, updates);
+    return scylla_db.updateItem(table_names.transactions, { pk, sk }, updates);
   }
 
   /**
@@ -600,7 +601,7 @@ class payment_gateway_service {
    * @param {string} sk - required
    */
   static async deleteTransaction(pk, sk) {
-    return scylla_db.deleteItem(table_names.transactions, pk, sk);
+    return scylla_db.deleteItem(table_names.transactions, { pk, sk });
   }
 
   /**
@@ -633,7 +634,8 @@ class payment_gateway_service {
    * @param {object} updates - required
    */
   static async updateSchedule(pk, sk, updates) {
-    return scylla_db.updateItem(table_names.schedules, pk, sk, updates);
+    console.log("item inside ", pk, sk, updates);
+    return scylla_db.updateItem(table_names.schedules, { pk, sk }, updates);
   }
 
   /**
@@ -642,7 +644,7 @@ class payment_gateway_service {
    * @param {string} sk - required
    */
   static async deleteSchedule(pk, sk) {
-    return scylla_db.deleteItem(table_names.schedules, pk, sk);
+    return scylla_db.deleteItem(table_names.schedules, { pk, sk });
   }
 
   /**
@@ -667,7 +669,7 @@ class payment_gateway_service {
    * @param {object} updates - required
    */
   static async updateWebhook(pk, sk, updates) {
-    return scylla_db.updateItem(table_names.webhooks, pk, sk, updates);
+    return scylla_db.updateItem(table_names.webhooks, { pk, sk }, updates);
   }
 
   /**
@@ -676,7 +678,7 @@ class payment_gateway_service {
    * @param {string} sk - required
    */
   static async deleteWebhook(pk, sk) {
-    return scylla_db.deleteItem(table_names.webhooks, pk, sk);
+    return scylla_db.deleteItem(table_names.webhooks, { pk, sk });
   }
 
   /**
@@ -701,7 +703,7 @@ class payment_gateway_service {
    * @param {object} updates - required
    */
   static async updateToken(pk, sk, updates) {
-    return scylla_db.updateItem(table_names.tokens, pk, sk, updates);
+    return scylla_db.updateItem(table_names.tokens, { pk, sk }, updates);
   }
 
   /**
@@ -710,7 +712,7 @@ class payment_gateway_service {
    * @param {string} sk - required
    */
   static async deleteToken(pk, sk) {
-    return scylla_db.deleteItem(table_names.tokens, pk, sk);
+    return scylla_db.deleteItem(table_names.tokens, { pk, sk });
   }
 }
 

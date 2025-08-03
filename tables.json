@@ -62,6 +62,8 @@
   },
   "paymentGateway_schedules": {
     "TableName": "paymentGateway_schedules",
+    "PK": "pk",
+    "SK": "sk",
     "KeySchema": [
       { "AttributeName": "pk", "KeyType": "HASH" },
       { "AttributeName": "sk", "KeyType": "RANGE" }
@@ -95,6 +97,8 @@
   },
   "paymentGateway_tokens": {
     "TableName": "paymentGateway_tokens",
+    "PK": "pk",
+    "SK": "sk",
     "KeySchema": [
       { "AttributeName": "pk", "KeyType": "HASH" },
       { "AttributeName": "sk", "KeyType": "RANGE" }
@@ -115,6 +119,8 @@
   },
   "paymentGateway_webhooks": {
     "TableName": "paymentGateway_webhooks",
+    "PK": "pk",
+    "SK": "sk",
     "KeySchema": [
       { "AttributeName": "pk", "KeyType": "HASH" },
       { "AttributeName": "sk", "KeyType": "RANGE" }
